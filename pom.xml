@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?><!-- $Id: pom.xml 336 2011-02-26 22:20:22Z ljnelson $ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:Xlint="urn:javac" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <prerequisites>
+    <maven>3.0.5</maven>
+  </prerequisites>
+
+  <groupId>com.edugility</groupId>
+  <artifactId>maven-artifacts</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <parent>
+    <groupId>com.edugility</groupId>
+    <artifactId>edugility-oss-pluginmanagement-pom</artifactId>
+    <version>2</version>
+  </parent>
+
+  <name>Maven Artifact Utilities</name>
+  <description>Maven Artifact Utilities</description>
+  <inceptionYear>2013</inceptionYear>
+  <url>http://ljnelson.github.com/${project.artifactId}/</url>
+
+  <scm>
+    <connection>scm:git:git@github.com:ljnelson/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:ljnelson/${project.artifactId}.git</developerConnection>
+    <url>https://github.com/ljnelson/${project.artifactId}/</url>
+  </scm>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-dependency-tree</artifactId>
+      <version>2.1</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-compat</artifactId>
+      <version>3.0.5</version>
+      <scope>compile</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.github.github</groupId>
+        <artifactId>site-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+    <testResources>
+      <testResource>
+        <filtering>true</filtering>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
+  </build>
+
+  <properties>
+
+    <!-- maven-compiler-plugin properties -->
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
+
+    <!-- maven-javadoc-plugin properties -->
+    <links>http://mvel.codehaus.org/javadoc/2.0/,http://junit.org/javadoc/4.10/</links>
+    <stylesheetfile>css/styles.css</stylesheetfile>
+
+  </properties>
+
+</project>
