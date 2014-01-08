@@ -228,7 +228,7 @@ public class Artifacts {
     if (returnValue == null) {
       returnValue = Collections.emptyList();
     } else {
-      returnValue = Collections.unmodifiableCollection(returnValue);
+      returnValue = Collections.unmodifiableList(returnValue);
     }
     return returnValue;
   }
