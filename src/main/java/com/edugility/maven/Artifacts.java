@@ -56,17 +56,90 @@ import org.apache.maven.shared.dependency.graph.DependencyNode;
 
 import org.apache.maven.shared.dependency.graph.traversal.CollectingDependencyNodeVisitor;
 
+/**
+ * A utility class for working with {@link Artifact}s.
+ *
+ * @author <a href="http://about.me/lairdnelson"
+ * target="_parent">Laird Nelson</a>
+ *
+ * @see Artifact
+ *
+ * @see #getArtifactsInTopologicalOrder(MavenProject,
+ * DependencyGraphBuilder, ArtifactFilter, ArtifactResolver,
+ * ArtifactRepository)
+ */
 public class Artifacts {
   
+  /**
+   * Creates a new {@link Artifact}s instance.
+   */
   public Artifacts() {
     super();
   }
-  
-  public Collection<? extends Artifact> getDependencyArtifactsInTopologicalOrder(final MavenProject project,
-                                                                                 final DependencyGraphBuilder dependencyGraphBuilder, 
-                                                                                 final ArtifactFilter filter,
-                                                                                 final ArtifactResolver resolver,
-                                                                                 final ArtifactRepository localRepository)
+
+  /**
+   * Returns an unmodifiable, non-{@code null} {@link Collection} of
+   * {@link Artifact}s, each element of which is a non-{@code null}
+   * {@link Artifact} that represents either the supplied {@link
+   * MavenProject} itself or a {@linkplain MavenProject#getArtifacts()
+   * dependency of it}.
+   *
+   * <p>Each {@link Artifact} in the returned {@link Collection} will
+   * be {@linkplain Artifact#isResolved() resolved}, and the {@link
+   * Collection} will be sorted in topological order, from an {@link
+   * Artifact} with no dependencies as the first element, to the
+   * {@link Artifact} representing the {@link MavenProject} itself as
+   * the last.</p>
+   *
+   * @param project the {@link MavenProject} for which resolved {@link
+   * Artifact}s should be returned; must not be {@code null}
+   *
+   * @param dependencyGraphBuilder the {@link DependencyGraphBuilder}
+   * instance that will calculate the dependency graph whose postorder
+   * traversal will yield the {@link Artifact}s to be resolved; must
+   * not be {@code null}
+   *
+   * @param filter an {@link ArtifactFilter} used during {@linkplain
+   * DependencyGraphBuilder#buildDependencyGraph(MavenProject,
+   * ArtifactFilter) dependency graph assembly}; may be {@code null}
+   *
+   * @param resolver an {@link ArtifactResolver} that will use the <a
+   * href="http://maven.apache.org/ref/3.0.5/maven-compat/apidocs/src-html/org/apache/maven/artifact/resolver/DefaultArtifactResolver.html#line.335">Maven
+   * 3.0.5 <code>Artifact</code> resolution algorithm</a> to resolve
+   * {@link Artifact}s returned by the {@link
+   * DependencyGraphBuilder#buildDependencyGraph(MavenProject,
+   * ArtifactFilter)} method; must not be {@code null}
+   *
+   * @param localRepository an {@link ArtifactRepository} representing
+   * the local Maven repository in effect; may be {@code null}
+   *
+   * @return a non-{@code null}, {@linkplain
+   * Collections#unmodifiableCollection(Collection) unmodifiable}
+   * {@link Collection} of non-{@code null}, {@linkplain
+   * Artifact#isResolved() resolved} {@link Artifact} instances
+   *
+   * @exception IllegalArgumentException if {@code project}, {@code
+   * dependencyGraphBuilder} or {@code resolver} is {@code null}
+   *
+   * @exception ArtifactResolutionException if there were problems
+   * {@linkplain ArtifactResolver#resolve(ArtifactResolutionRequest)
+   * resolving} {@link Artifact} instances
+   *
+   * @exception DependencyGraphBuilderException if there were problems
+   * {@linkplain
+   * DependencyGraphBuilder#buildDependencyGraph(MavenProject,
+   * ArtifactFilter) building the dependency graph}
+   *
+   * @see ArtifactResolver#resolve(ArtifactResolutionRequest)
+   *
+   * @see DependencyGraphBuilder#buildDependencyGraph(MavenProject,
+   * ArtifactFilter)
+   */
+  public Collection<? extends Artifact> getArtifactsInTopologicalOrder(final MavenProject project,
+                                                                       final DependencyGraphBuilder dependencyGraphBuilder, 
+                                                                       final ArtifactFilter filter,
+                                                                       final ArtifactResolver resolver,
+                                                                       final ArtifactRepository localRepository)
     throws DependencyGraphBuilderException, ArtifactResolutionException {
     if (project == null) {
       throw new IllegalArgumentException("project", new NullPointerException("project"));
@@ -77,12 +150,7 @@ public class Artifacts {
     if (resolver == null) {
       throw new IllegalArgumentException("resolver", new NullPointerException("resolver"));
     }
-
     List<Artifact> returnValue = null;
-
-    final Artifact projectArtifact = project.getArtifact();
-    assert projectArtifact != null;
-    assert projectArtifact.isResolved();
 
     final DependencyNode projectNode = dependencyGraphBuilder.buildDependencyGraph(project, filter);
     assert projectNode != null;
@@ -92,6 +160,7 @@ public class Artifacts {
 
     final Collection<? extends DependencyNode> nodes = visitor.getNodes();
     if (nodes != null && !nodes.isEmpty()) {
+      final Artifact projectArtifact = project.getArtifact();
 
       returnValue = new ArrayList<Artifact>();
 
@@ -113,20 +182,16 @@ public class Artifacts {
                 final Artifact pa = artifactMap.get(new StringBuilder(artifact.getGroupId()).append(":").append(artifact.getArtifactId()).toString());
                 if (pa != null) {
                   artifact = pa;
-                  assert artifact.isResolved();
-                  assert artifact.getFile() != null;
                 }
               }
 
-              if (!artifact.isResolved()) {
+              if (!artifact.isResolved() && projectArtifact != null) {
                 // Next, see if the project's artifact itself "is" the
                 // current artifact.  The project's artifact is
                 // guaranteed to be resolved.
                 if (projectArtifact.getGroupId().equals(artifact.getGroupId()) &&
                     projectArtifact.getArtifactId().equals(artifact.getArtifactId())) {
                   artifact = projectArtifact;
-                  assert artifact.isResolved();
-                  assert artifact.getFile() != null;
                 }
               }
 
@@ -145,12 +210,7 @@ public class Artifacts {
                 } else {
                   @SuppressWarnings("unchecked")
                   final Collection<? extends Artifact> resolvedArtifacts = (Set<? extends Artifact>)result.getArtifacts();
-                  assert resolvedArtifacts != null;
-                  assert resolvedArtifacts.size() == 1;
                   artifact = resolvedArtifacts.iterator().next();
-                  assert artifact != null;
-                  assert artifact.isResolved();
-                  assert artifact.getFile() != null;
                 }
               }
             }
@@ -164,6 +224,11 @@ public class Artifacts {
       if (!returnValue.isEmpty()) {
         Collections.reverse(returnValue);
       }
+    }
+    if (returnValue == null) {
+      returnValue = Collections.emptyList();
+    } else {
+      returnValue = Collections.unmodifiableCollection(returnValue);
     }
     return returnValue;
   }
