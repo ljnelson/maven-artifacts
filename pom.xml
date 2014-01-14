@@ -78,4 +78,24 @@
 
   </properties>
 
+  <reporting>
+    <plugins>
+
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${mavenJavadocPluginVersion}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>2.5.3</version>
+        <configuration>
+          <excludeFilterFile>${basedir}/src/findbugs/exclude.xml</excludeFilterFile>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </reporting>
+
 </project>
