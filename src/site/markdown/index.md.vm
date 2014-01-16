@@ -1,0 +1,15 @@
+<!-- -*- markdown -*- -->
+# Introduction
+
+Welcome to the `${project.artifactId}` project.
+`${project.artifactId}` provides utilities for working with [Maven][1]
+[`Artifact`][2]s.
+
+# API Documentation
+
+The API is fully documented.  Please see the [API documentation][3] to
+get started.
+
+[1]: http://maven.apache.org/
+[2]: http://maven.apache.org/ref/${mavenVersion}/maven-artifact/apidocs/org/apache/maven/artifact/Artifact.html
+[3]: apidocs/index.html
