@@ -101,12 +101,21 @@ public class Artifacts {
    * MavenProject} itself or a {@linkplain MavenProject#getArtifacts()
    * dependency of it}.
    *
-   * <p>Each {@link Artifact} in the returned {@link Collection} will
-   * be {@linkplain Artifact#isResolved() resolved}, and the {@link
-   * Collection} will be sorted in topological order, from an {@link
-   * Artifact} with no dependencies as the first element, to the
-   * {@link Artifact} representing the {@link MavenProject} itself as
-   * the last.</p>
+   * <p>The returned {@link Artifact} {@link Collection} will be
+   * sorted in topological order, from an {@link Artifact} with no
+   * dependencies as the first element, to the {@link Artifact}
+   * representing the {@link MavenProject} itself as the last.</p>
+   *
+   * <p>All {@link Artifact}s that are not {@linkplain
+   * Artifact#equals(Object) equal to} the return value of {@link
+   * MavenProject#getArtifact() project.getArtifact()} will be
+   * {@linkplain ArtifactResolver#resolve(ArtifactResolutionRequest)
+   * resolved} if they are not already {@linkplain
+   * Artifact#isResolved() resolved}.  No guarantee of {@linkplain
+   * Artifact#isResolved() resolution status} is made of the
+   * {@linkplain MavenProject#getArtifact() project
+   * <code>Artifact</code>}, which in normal&mdash;possibly
+   * all?&mdash;cases will be unresolved.</p>
    *
    * @param project the {@link MavenProject} for which resolved {@link
    * Artifact}s should be returned; must not be {@code null}
@@ -132,8 +141,7 @@ public class Artifacts {
    *
    * @return a non-{@code null}, {@linkplain
    * Collections#unmodifiableCollection(Collection) unmodifiable}
-   * {@link Collection} of non-{@code null}, {@linkplain
-   * Artifact#isResolved() resolved} {@link Artifact} instances
+   * {@link Collection} of non-{@code null} {@link Artifact} instances
    *
    * @exception IllegalArgumentException if {@code project}, {@code
    * dependencyGraphBuilder} or {@code resolver} is {@code null}
@@ -176,15 +184,15 @@ public class Artifacts {
 
     final DependencyNode projectNode = dependencyGraphBuilder.buildDependencyGraph(project, filter);
     assert projectNode != null;
-
     final CollectingDependencyNodeVisitor visitor = new CollectingDependencyNodeVisitor();
     projectNode.accept(visitor);
-
     final Collection<? extends DependencyNode> nodes = visitor.getNodes();
+
     if (nodes == null || nodes.isEmpty()) {
       if (logger != null && logger.isLoggable(Level.FINE)) {
         logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "No dependency nodes encountered");
       }
+
     } else {
       final Artifact projectArtifact = project.getArtifact();
 
@@ -200,76 +208,72 @@ public class Artifacts {
                 logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact {0} is unresolved", artifact);
               }
 
-              // First see if the project's associated artifact map
-              // contains a resolved version of this artifact.  The
-              // artifact map contains all transitive dependency
-              // artifacts of the project.  Each artifact in the map
-              // is guaranteed to be resolved.
-              @SuppressWarnings("unchecked")
-              final Map<String, Artifact> artifactMap = project.getArtifactMap();
-              if (artifactMap != null) {
-                final Artifact pa = artifactMap.get(new StringBuilder(artifact.getGroupId()).append(":").append(artifact.getArtifactId()).toString());
-                if (pa != null) {
-                  if (logger != null && logger.isLoggable(Level.FINE)) {
-                    logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact {0} resolved from project artifact map: {1}", new Object[] { artifact, pa });
-                  }
-                  artifact = pa;
-                }
-              }
-
-              if (!artifact.isResolved() && projectArtifact != null) {
-                // Next, see if the project's artifact itself "is" the
-                // current artifact.  The project's artifact is
-                // guaranteed to be resolved.
-                if (projectArtifact.getGroupId().equals(artifact.getGroupId()) &&
-                    projectArtifact.getArtifactId().equals(artifact.getArtifactId())) {
-                  if (logger != null && logger.isLoggable(Level.FINE)) {
-                    logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact {0} resolved to project artifact: {1}", new Object[] { artifact, projectArtifact });
-                  }
-                  artifact = projectArtifact;
-                }
-              }
-
-              if (!artifact.isResolved()) {
-                // Finally, perform manual artifact resolution.
-                final ArtifactResolutionRequest request = new ArtifactResolutionRequest();
-                request.setArtifact(artifact);
-                request.setLocalRepository(localRepository);
-                @SuppressWarnings("unchecked")
-                final List<ArtifactRepository> remoteRepositories = project.getRemoteArtifactRepositories();
-                request.setRemoteRepositories(remoteRepositories);
-
+              if (artifact.equals(projectArtifact)) {
+                // First see if the artifact is the project artifact.
+                // If so, then it by definition won't be able to be
+                // resolved, because it's being built.
                 if (logger != null && logger.isLoggable(Level.FINE)) {
-                  logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Resolving artifact {0} using ArtifactResolutionRequest {1}", new Object[] { artifact, request });
+                  logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact {0} resolved to project artifact: {1}", new Object[] { artifact, projectArtifact });
+                }
+                artifact = projectArtifact;
+
+              } else {
+                // See if the project's associated artifact map
+                // contains a resolved version of this artifact.  The
+                // artifact map contains all transitive dependency
+                // artifacts of the project.  Each artifact in the map
+                // is guaranteed to be resolved.
+                @SuppressWarnings("unchecked")
+                final Map<String, Artifact> artifactMap = project.getArtifactMap();
+                if (artifactMap != null && !artifactMap.isEmpty()) {
+                  final Artifact mapArtifact = artifactMap.get(new StringBuilder(artifact.getGroupId()).append(":").append(artifact.getArtifactId()).toString());
+                  if (mapArtifact != null) {
+                    if (logger != null && logger.isLoggable(Level.FINE)) {
+                      logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact {0} resolved from project artifact map: {1}", new Object[] { artifact, mapArtifact });
+                    }
+                    artifact = mapArtifact;
+                  }
                 }
 
-                final ArtifactResolutionResult result = resolver.resolve(request);
-                if (result == null || !result.isSuccess()) {
-                  new DefaultResolutionErrorHandler().throwErrors(request, result);
-                } else {
+                if (!artifact.isResolved()) {
+                  // Finally, perform manual artifact resolution.
+                  final ArtifactResolutionRequest request = new ArtifactResolutionRequest();
+                  request.setArtifact(artifact);
+                  request.setLocalRepository(localRepository);
                   @SuppressWarnings("unchecked")
-                  final Collection<? extends Artifact> resolvedArtifacts = (Set<? extends Artifact>)result.getArtifacts();
-                  if (resolvedArtifacts == null || resolvedArtifacts.isEmpty()) {
-                    if (logger != null && logger.isLoggable(Level.WARNING)) {
-                      logger.logp(Level.WARNING, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact resolution failed silently for artifact {0}", artifact);
-                    }
+                  final List<ArtifactRepository> remoteRepositories = project.getRemoteArtifactRepositories();
+                  request.setRemoteRepositories(remoteRepositories);
+
+                  if (logger != null && logger.isLoggable(Level.FINE)) {
+                    logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Resolving artifact {0} using ArtifactResolutionRequest {1}", new Object[] { artifact, request });
+                  }
+
+                  final ArtifactResolutionResult result = resolver.resolve(request);
+                  if (result == null || !result.isSuccess()) {
+                    this.handleArtifactResolutionError(request, result);
                   } else {
-                    final Artifact resolvedArtifact = resolvedArtifacts.iterator().next();
-                    if (resolvedArtifact != null) {
-                      assert resolvedArtifact.isResolved();
-                      artifact = resolvedArtifact;
-                    } else if (logger != null && logger.isLoggable(Level.WARNING)) {
-                      logger.logp(Level.WARNING, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact resolution failed silently for artifact {0}", artifact);
+                    @SuppressWarnings("unchecked")
+                    final Collection<? extends Artifact> resolvedArtifacts = (Set<? extends Artifact>)result.getArtifacts();
+                    if (resolvedArtifacts == null || resolvedArtifacts.isEmpty()) {
+                      if (logger != null && logger.isLoggable(Level.WARNING)) {
+                        logger.logp(Level.WARNING, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact resolution failed silently for artifact {0}", artifact);
+                      }
+                    } else {
+                      final Artifact resolvedArtifact = resolvedArtifacts.iterator().next();
+                      if (resolvedArtifact != null) {
+                        assert resolvedArtifact.isResolved();
+                        artifact = resolvedArtifact;
+                      } else if (logger != null && logger.isLoggable(Level.WARNING)) {
+                        logger.logp(Level.WARNING, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact resolution failed silently for artifact {0}", artifact);
+                      }
                     }
                   }
                 }
+
               }
             }
 
             if (artifact != null) {
-              assert artifact.isResolved();
-              assert artifact.getFile() != null;
-              assert artifact.getFile().canRead();
               returnValue.add(artifact);
             }
           }
@@ -288,6 +292,10 @@ public class Artifacts {
       logger.exiting(this.getClass().getName(), "getArtifactsInTopologicalOrder", returnValue);
     }
     return returnValue;
+  }
+
+  protected void handleArtifactResolutionError(final ArtifactResolutionRequest request, final ArtifactResolutionResult result) throws ArtifactResolutionException {
+    new DefaultResolutionErrorHandler().throwErrors(request, result);
   }
 
 }
