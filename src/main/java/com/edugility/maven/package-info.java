@@ -29,7 +29,7 @@
 /**
  * Provides classes and interfaces for working with <a
  * href="http://maven.apache.org/">Maven</a> {@link
- * org.apache.maven.Artifact}s.
+ * org.apache.maven.artifact.Artifact}s.
  *
  * @author <a href="http://about.me/lairdnelson"
  * target="_parent">Laird Nelson</a>

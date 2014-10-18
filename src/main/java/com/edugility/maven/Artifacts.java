@@ -107,7 +107,7 @@ public class Artifacts {
    * representing the {@link MavenProject} itself as the last.</p>
    *
    * <p>All {@link Artifact}s that are not {@linkplain
-   * Artifact#equals(Object) equal to} the return value of {@link
+   * Object#equals(Object) equal to} the return value of {@link
    * MavenProject#getArtifact() project.getArtifact()} will be
    * {@linkplain ArtifactResolver#resolve(ArtifactResolutionRequest)
    * resolved} if they are not already {@linkplain
@@ -294,6 +294,35 @@ public class Artifacts {
     return returnValue;
   }
 
+  /**
+   * Handles an error that is represented by the supplied {@link
+   * ArtifactResolutionResult} that was issued in response to the
+   * supplied {@link ArtifactResolutionRequest}.
+   *
+   * <p>This implementation performs the following operations:</p>
+   *
+   * <blockquote><pre>new {@link
+   * DefaultResolutionErrorHandler#DefaultResolutionErrorHandler() new
+   * DefaultResolutionErrorHandler()}.{@link
+   * DefaultResolutionErrorHandler#throwErrors(ArtifactResolutionRequest,
+   * ArtifactResolutionResult) throwErrors(request,
+   * result)};</pre></blockquote>
+   *
+   * @param request the {@link ArtifactResolutionRequest} that caused
+   * the error; must not be {@code null}
+   *
+   * @param result the {@link ArtifactResolutionResult} that resulted;
+   * must not be {@code null}
+   *
+   * @exception ArtifactResolutionException if this method is not
+   * overridden to do something else
+   *
+   * @see DefaultResolutionErrorHandler
+   *
+   * @see
+   * DefaultResolutionErrorHandler#throwErrors(ArtifactResolutionRequest,
+   * ArtifactResolutionResult)
+   */
   protected void handleArtifactResolutionError(final ArtifactResolutionRequest request, final ArtifactResolutionResult result) throws ArtifactResolutionException {
     new DefaultResolutionErrorHandler().throwErrors(request, result);
   }

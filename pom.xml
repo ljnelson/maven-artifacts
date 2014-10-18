@@ -53,6 +53,79 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+
+<plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <configuration>
+            <additionalparam>
+              -all
+              -collpackages "java.util.*"
+              -hide "java.*"
+              -inferrel
+              -qualify
+              -views
+            </additionalparam>
+            <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
+            <docletArtifact>
+              <groupId>org.umlgraph</groupId>
+              <artifactId>umlgraph</artifactId>
+              <version>${umlGraphVersion}</version>
+            </docletArtifact>
+            <groups>
+              <group>
+                <title>Core API</title>
+                <packages>com.edugility.maven</packages>
+              </group>
+            </groups>
+            <tags>
+              <tag>
+                <name>depend</name>
+                <placement>X</placement>
+              </tag>
+              <tag>
+                <name>note</name>
+                <placement>a</placement>
+              </tag>
+              <tag>
+                <name>opt</name>
+                <placement>a</placement>
+              </tag>
+              <tag>
+                <name>hidden</name>
+                <placement>a</placement>
+              </tag>
+              <tag>
+                <name>navassoc</name>
+                <placement>a</placement>
+              </tag>
+              <tag>
+                <name>assoc</name>
+                <placement>a</placement>
+              </tag>
+              <tag>
+                <name>has</name>
+                <placement>a</placement>
+              </tag>
+              <tag>
+                <name>stereotype</name>
+                <placement>a</placement>
+                <head>Stereotypes:</head>
+              </tag>
+            </tags>
+            <useStandardDocletOptions>true</useStandardDocletOptions>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>com.github.github</groupId>
+          <artifactId>site-maven-plugin</artifactId>
+          <version>0.10</version>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
     <plugins>
 
       <plugin>
@@ -96,6 +169,8 @@
     <links>http://junit.org/javadoc/4.10/,http://maven.apache.org/ref/${mavenVersion}/apidocs/,http://maven.apache.org/shared/maven-dependency-tree/apidocs/</links>
     <stylesheetfile>css/styles.css</stylesheetfile>
 
+    <umlGraphVersion>5.6.6</umlGraphVersion>
+
   </properties>
 
   <reporting>
@@ -104,6 +179,64 @@
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${mavenJavadocPluginVersion}</version>
+        <configuration>
+          <additionalparam>
+            -all
+            -collpackages "java.util.*"
+            -hide "java.*"
+            -inferrel
+            -qualify
+            -views
+          </additionalparam>
+          <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
+          <docletArtifact>
+            <groupId>org.umlgraph</groupId>
+            <artifactId>umlgraph</artifactId>
+            <version>${umlGraphVersion}</version>
+          </docletArtifact>
+          <groups>
+            <group>
+              <title>Core API</title>
+              <packages>com.edugility.maven</packages>
+            </group>
+          </groups>
+          <tags>
+            <tag>
+              <name>depend</name>
+              <placement>X</placement>
+            </tag>
+            <tag>
+              <name>note</name>
+              <placement>a</placement>
+            </tag>
+            <tag>
+              <name>opt</name>
+              <placement>a</placement>
+            </tag>
+            <tag>
+              <name>hidden</name>
+              <placement>a</placement>
+            </tag>
+            <tag>
+              <name>navassoc</name>
+              <placement>a</placement>
+            </tag>
+            <tag>
+              <name>assoc</name>
+              <placement>a</placement>
+            </tag>
+            <tag>
+              <name>has</name>
+              <placement>a</placement>
+            </tag>
+            <tag>
+              <name>stereotype</name>
+              <placement>a</placement>
+              <head>Stereotypes:</head>
+            </tag>
+          </tags>
+          <useStandardDocletOptions>true</useStandardDocletOptions>
+        </configuration>
       </plugin>
 
       <plugin>
