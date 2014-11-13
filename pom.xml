@@ -161,12 +161,15 @@
 
     <mavenVersion>3.0.5</mavenVersion>
 
+    <!-- maven-release-plugin properties -->
+    <goals>deploy site-deploy</goals>
+    
     <!-- maven-compiler-plugin properties -->
     <maven.compiler.source>1.6</maven.compiler.source>
     <maven.compiler.target>1.6</maven.compiler.target>
 
     <!-- maven-javadoc-plugin properties -->
-    <links>http://junit.org/javadoc/4.10/,http://maven.apache.org/ref/${mavenVersion}/apidocs/,http://maven.apache.org/shared/maven-dependency-tree/apidocs/</links>
+    <links>http://junit.org/apidocs/,http://maven.apache.org/ref/${mavenVersion}/apidocs/,http://maven.apache.org/shared/maven-dependency-tree/apidocs/</links>
     <stylesheetfile>css/styles.css</stylesheetfile>
 
     <umlGraphVersion>5.6.6</umlGraphVersion>
