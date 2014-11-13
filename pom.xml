@@ -170,8 +170,6 @@
 
     <!-- maven-javadoc-plugin properties -->
     <links>http://junit.org/apidocs/,http://maven.apache.org/ref/${mavenVersion}/apidocs/,http://maven.apache.org/shared/maven-dependency-tree/apidocs/</links>
-    <stylesheetfile>css/styles.css</stylesheetfile>
-
     <umlGraphVersion>5.6.6</umlGraphVersion>
 
   </properties>

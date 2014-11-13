@@ -85,7 +85,7 @@ public class Artifacts {
    * <p>This method never returns {@code null}.</p>
    *
    * <p>The default implementation returns the result of invoking
-   * {@linkplain Logger#getLogger(String)
+   * {@link Logger#getLogger(String)
    * Logger.getLogger(this.getClass().getName())}.</p>
    *
    * @return a non-{@code null} {@link Logger}
@@ -302,7 +302,7 @@ public class Artifacts {
    * <p>This implementation performs the following operations:</p>
    *
    * <blockquote><pre>new {@link
-   * DefaultResolutionErrorHandler#DefaultResolutionErrorHandler() new
+   * DefaultResolutionErrorHandler#DefaultResolutionErrorHandler()
    * DefaultResolutionErrorHandler()}.{@link
    * DefaultResolutionErrorHandler#throwErrors(ArtifactResolutionRequest,
    * ArtifactResolutionResult) throwErrors(request,
