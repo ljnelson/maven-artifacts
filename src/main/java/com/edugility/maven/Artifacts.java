@@ -30,6 +30,7 @@ package com.edugility.maven;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +71,28 @@ import org.apache.maven.shared.dependency.graph.traversal.CollectingDependencyNo
  * ArtifactRepository)
  */
 public class Artifacts {
+
+
+  /*
+   * Static fields.
+   */
+
+  
+  /**
+   * A {@link ScopeComparator} used to sort the {@link List} returned
+   * by the {@link #getArtifactsInTopologicalOrder(MavenProject,
+   * DependencyGraphBuilder, ArtifactFilter, ArtifactResolver,
+   * ArtifactRepository)} method.
+   *
+   * <p>This field is never {@code null}.</p>
+   */
+  private static final ScopeComparator scopeComparator = new ScopeComparator();
+
+
+  /*
+   * Constructors.
+   */
+
   
   /**
    * Creates a new {@link Artifact}s instance.
@@ -77,6 +100,12 @@ public class Artifacts {
   public Artifacts() {
     super();
   }
+
+
+  /*
+   * Instance methods.
+   */
+  
 
   /**
    * Returns a {@link Logger} suitable for this {@link Artifacts}
@@ -202,12 +231,12 @@ public class Artifacts {
         if (node != null) {
           Artifact artifact = node.getArtifact();
           if (artifact != null) {
-
+            
             if (!artifact.isResolved()) {
               if (logger != null && logger.isLoggable(Level.FINE)) {
                 logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact {0} is unresolved", artifact);
               }
-
+              
               if (artifact.equals(projectArtifact)) {
                 // First see if the artifact is the project artifact.
                 // If so, then it by definition won't be able to be
@@ -216,7 +245,7 @@ public class Artifacts {
                   logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Artifact {0} resolved to project artifact: {1}", new Object[] { artifact, projectArtifact });
                 }
                 artifact = projectArtifact;
-
+                
               } else {
                 // See if the project's associated artifact map
                 // contains a resolved version of this artifact.  The
@@ -234,7 +263,7 @@ public class Artifacts {
                     artifact = mapArtifact;
                   }
                 }
-
+                
                 if (!artifact.isResolved()) {
                   // Finally, perform manual artifact resolution.
                   final ArtifactResolutionRequest request = new ArtifactResolutionRequest();
@@ -243,11 +272,11 @@ public class Artifacts {
                   @SuppressWarnings("unchecked")
                   final List<ArtifactRepository> remoteRepositories = project.getRemoteArtifactRepositories();
                   request.setRemoteRepositories(remoteRepositories);
-
+                  
                   if (logger != null && logger.isLoggable(Level.FINE)) {
                     logger.logp(Level.FINE, this.getClass().getName(), "getArtifactsInTopologicalOrder", "Resolving artifact {0} using ArtifactResolutionRequest {1}", new Object[] { artifact, request });
                   }
-
+                  
                   final ArtifactResolutionResult result = resolver.resolve(request);
                   if (result == null || !result.isSuccess()) {
                     this.handleArtifactResolutionError(request, result);
@@ -269,18 +298,19 @@ public class Artifacts {
                     }
                   }
                 }
-
+                
               }
             }
-
+            
             if (artifact != null) {
               returnValue.add(artifact);
             }
           }
         }
       }
-      if (!returnValue.isEmpty()) {
+      if (!returnValue.isEmpty()) {        
         Collections.reverse(returnValue);
+        Collections.sort(returnValue, scopeComparator);
       }
     }
     if (returnValue == null) {
@@ -327,4 +357,78 @@ public class Artifacts {
     new DefaultResolutionErrorHandler().throwErrors(request, result);
   }
 
+
+  /*
+   * Inner and nested classes.
+   */
+
+  
+  /**
+   * A {@link Comparator} of {@link Artifact}s that sorts {@code
+   * test}-scoped {@link Artifact}s to the "right".
+   *
+   * <p>Note: this {@linkplain Comparator comparator} imposes
+   * orderings that are {@linkplain Comparator#compare(Object, Object)
+   * inconsistent with equals}.</p>
+   *
+   * <p>Instances of this class are safe for use by concurrent {@link
+   * Thread}s.</p>
+   *
+   * @author <a href="http://about.me/lairdnelson"
+   * target="_parent">Laird Nelson</a>
+   *
+   * @see Comparator
+   *
+   * @see Artifact
+   *
+   * @see Artifact#getScope()
+   */
+  private static final class ScopeComparator implements Comparator<Artifact> {
+
+    /**
+     * Creates a new {@link ScopeComparator}.
+     */
+    private ScopeComparator() {
+      super();
+    }
+
+    /**
+     * Compares the two supplied {@link Artifact}s by testing
+     * {@linkplain Artifact#getScope() their affiliated scopes}.
+     *
+     * @param a1 the first {@link Artifact} to test; must not be
+     * {@code null}
+     *
+     * @param a2 the second {@link Artifact} to test; must not be
+     * {@code null}
+     *
+     * @return {@code 1} when the first {@link Artifact} has a
+     * {@linkplain Artifact#getScope() scope} of {@code test} and the
+     * second one doesn't; {@code -1} when the second {@link Artifact}
+     * has a {@linkplain Artifact#getScope() scope} of {@code test}
+     * and the first one doesn't; {@code 0} in all other cases
+     *
+     * @exception NullPointerException if either {@code a1} or {@code
+     * a2} is {@code null}
+     */
+    @Override
+    public final int compare(final Artifact a1, final Artifact a2) {
+      if (a1 == null) {
+        throw new NullPointerException("a1");
+      }
+      if (a2 == null) {
+        throw new NullPointerException("a2");
+      }      
+      if ("test".equals(a1.getScope())) {
+        if (!"test".equals(a2.getScope())) {
+          return 1; // test scopes sort to the right/come at the end
+        }
+      } else if ("test".equals(a2.getScope())) {
+        return -1;
+      }
+      return 0;
+    }
+    
+  }
+  
 }
