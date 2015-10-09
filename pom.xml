@@ -13,7 +13,7 @@
   <parent>
     <groupId>com.edugility</groupId>
     <artifactId>edugility-oss-pluginmanagement-pom</artifactId>
-    <version>4</version>
+    <version>6</version>
   </parent>
 
   <name>Maven Artifact Utilities</name>
@@ -121,7 +121,7 @@
         <plugin>
           <groupId>com.github.github</groupId>
           <artifactId>site-maven-plugin</artifactId>
-          <version>0.10</version>
+          <version>0.12</version>
         </plugin>
 
       </plugins>
@@ -159,7 +159,7 @@
 
   <properties>
 
-    <mavenVersion>3.0.5</mavenVersion>
+    <mavenVersion>3.3.3</mavenVersion>
 
     <!-- maven-release-plugin properties -->
     <goals>deploy site-deploy</goals>
