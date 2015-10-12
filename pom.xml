@@ -13,7 +13,7 @@
   <parent>
     <groupId>com.edugility</groupId>
     <artifactId>edugility-oss-pluginmanagement-pom</artifactId>
-    <version>13</version>
+    <version>14</version>
   </parent>
 
   <name>Maven Artifact Utilities</name>
