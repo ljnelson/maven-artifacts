@@ -51,6 +51,8 @@ import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.DefaultProjectBuildingRequest;
+import org.apache.maven.project.ProjectBuildingRequest;
 
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;

@@ -13,7 +13,7 @@
   <parent>
     <groupId>com.edugility</groupId>
     <artifactId>edugility-oss-pluginmanagement-pom</artifactId>
-    <version>6</version>
+    <version>13</version>
   </parent>
 
   <name>Maven Artifact Utilities</name>
@@ -243,7 +243,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.2</version>
         <configuration>
           <excludeFilterFile>${basedir}/src/findbugs/exclude.xml</excludeFilterFile>
         </configuration>
